@@ -130,7 +130,7 @@
         <button class="learn-more-btn">Learn More</button>
     </div>
 
-    <script src="edge-impulse-standalone.js"></script>
+    <script src="path-to-your-edge-impulse-standalone.js"></script>
     <script>
         const uploadPhotoBtn = document.getElementById('upload-photo-btn');
         const uploadedPhoto = document.getElementById('uploaded-photo');
@@ -138,21 +138,30 @@
         const classificationResultsScreen = document.getElementById('classification-results-screen');
         const recyclingTipsScreen = document.getElementById('recycling-tips-screen');
         const learnRecycleBtn = document.getElementById('learn-recycle-btn');
-        
+
         let classifier;
 
-        // Initialize the classifier once when the page loads
+        // Initialize the classifier once
         async function initClassifier() {
             classifier = new EdgeImpulseClassifier();
             await classifier.init();
         }
-        
+
+        // Initialize classifier on page load
+        initClassifier();
+
+        // Classify the image
         async function classifyImage(imageData) {
-            // Classify the image using the classifier
-            const res = await classifier.classify(imageData);
-            return res;
+            try {
+                let res = await classifier.classify(imageData);
+                return res;
+            } catch (error) {
+                console.error("Error during classification:", error);
+                return null;
+            }
         }
 
+        // Display classification results
         function showClassificationResults(photoData, classificationResultText, isRecyclable) {
             uploadedPhoto.textContent = "Uploaded Photo";
             uploadedPhoto.style.backgroundImage = `url(${photoData})`;
@@ -168,9 +177,6 @@
             }
         }
 
-        // Initialize the classifier when the page loads
-        initClassifier();
-        
         uploadPhotoBtn.addEventListener('click', () => {
             const input = document.createElement('input');
             input.type = 'file';
@@ -185,11 +191,11 @@
                     const photoData = reader.result;  // base64 string
 
                     classifyImage(photoData).then(res => {
-                        const classificationText = res.result.label;
-                        const isRecyclable = classificationText.toLowerCase() === 'recyclable';
-                        showClassificationResults(photoData, classificationText, isRecyclable);
-                    }).catch(error => {
-                        console.error('Error during classification:', error);
+                        if (res) {
+                            const classificationText = res.result.label;
+                            const isRecyclable = classificationText.toLowerCase() === 'recyclable';
+                            showClassificationResults(photoData, classificationText, isRecyclable);
+                        }
                     });
                 };
                 
