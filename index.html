@@ -98,14 +98,12 @@
     </style>
 </head>
 <body>
-    <!-- Home Screen -->
     <header>
         Smart Waste
     </header>
     
     <div class="button-container">
-        <button id="take-photo-btn">Take a Photo</button>
-        <button id="upload-photo-btn">Upload Image</button>
+        <button id="upload-photo-btn">Take or Upload Photo</button>
     </div>
 
     <div class="nav-bar">
@@ -113,7 +111,6 @@
         <a href="#tips"><i class="fas fa-book">📘</i></a>
     </div>
 
-    <!-- Classification Results Screen -->
     <div id="classification-results-screen" style="display: none;">
         <header>Classification Results</header>
         <div class="photo-placeholder" id="uploaded-photo">
@@ -123,7 +120,6 @@
         <button class="learn-more-btn" id="learn-recycle-btn" style="display:none;">Learn How to Recycle This Item</button>
     </div>
 
-    <!-- Recycling Tips Screen -->
     <div id="recycling-tips-screen" style="display: none;">
         <header>Recycling Tips</header>
         <ul id="tips-list">
@@ -136,8 +132,6 @@
 
     <script src="edge-impulse-standalone.js"></script>
     <script>
-        // Handle photo upload and classification logic
-        const takePhotoBtn = document.getElementById('take-photo-btn');
         const uploadPhotoBtn = document.getElementById('upload-photo-btn');
         const uploadedPhoto = document.getElementById('uploaded-photo');
         const classificationResult = document.getElementById('classification-result');
@@ -145,7 +139,6 @@
         const recyclingTipsScreen = document.getElementById('recycling-tips-screen');
         const learnRecycleBtn = document.getElementById('learn-recycle-btn');
 
-        // Initialize Edge Impulse classifier
         async function classifyImage(imageData) {
             const classifier = new EdgeImpulseClassifier();
             await classifier.init();
@@ -154,7 +147,6 @@
             return res;
         }
 
-        // Show classification results
         function showClassificationResults(photoData, classificationResultText, isRecyclable) {
             uploadedPhoto.textContent = "Uploaded Photo";
             uploadedPhoto.style.backgroundImage = `url(${photoData})`;
@@ -163,60 +155,13 @@
             
             if (isRecyclable) {
                 learnRecycleBtn.style.display = 'inline-block';
-                recyclingTipsScreen.style.display = 'block'; // Show recycling tips if recyclable
+                recyclingTipsScreen.style.display = 'block';
             } else {
                 learnRecycleBtn.style.display = 'none';
-                recyclingTipsScreen.style.display = 'none'; // Hide recycling tips if not recyclable
+                recyclingTipsScreen.style.display = 'none';
             }
         }
 
-        // Handle the "Take a Photo" button
-        takePhotoBtn.addEventListener('click', () => {
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then((stream) => {
-                    const video = document.createElement('video');
-                    video.srcObject = stream;
-                    video.play();
-                    document.body.appendChild(video);
-
-                    // Create a button to take the snapshot
-                    const snapshotButton = document.createElement('button');
-                    snapshotButton.textContent = 'Take Snapshot';
-                    snapshotButton.style.position = 'absolute';
-                    snapshotButton.style.bottom = '10px';
-                    snapshotButton.style.left = '50%';
-                    snapshotButton.style.transform = 'translateX(-50%)';
-                    document.body.appendChild(snapshotButton);
-
-                    snapshotButton.addEventListener('click', () => {
-                        // Take a snapshot from the video stream
-                        const canvas = document.createElement('canvas');
-                        canvas.width = video.videoWidth;
-                        canvas.height = video.videoHeight;
-                        const context = canvas.getContext('2d');
-                        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                        const photoData = canvas.toDataURL('image/png');
-
-                        // Process the image through Edge Impulse model
-                        classifyImage(photoData).then(res => {
-                            const classificationText = res.result.label;
-                            const isRecyclable = classificationText.toLowerCase() === 'recyclable';
-                            showClassificationResults(photoData, classificationText, isRecyclable);
-                        });
-
-                        // Clean up video and button
-                        video.srcObject.getTracks().forEach(track => track.stop());
-                        document.body.removeChild(video);
-                        document.body.removeChild(snapshotButton);
-                    });
-                })
-                .catch((err) => {
-                    console.error('Error accessing camera: ', err);
-                });
-        });
-
-        // Handle the "Upload Image" button
         uploadPhotoBtn.addEventListener('click', () => {
             const input = document.createElement('input');
             input.type = 'file';
@@ -226,27 +171,12 @@
             input.addEventListener('change', (event) => {
                 const photoData = URL.createObjectURL(event.target.files[0]);
                 
-                // Process the image through Edge Impulse model
                 classifyImage(photoData).then(res => {
                     const classificationText = res.result.label;
                     const isRecyclable = classificationText.toLowerCase() === 'recyclable';
                     showClassificationResults(photoData, classificationText, isRecyclable);
                 });
             });
-        });
-
-        // Navigation bar
-        const homeBtn = document.querySelector('a[href="#home"]');
-        const tipsBtn = document.querySelector('a[href="#tips"]');
-
-        homeBtn.addEventListener('click', () => {
-            classificationResultsScreen.style.display = 'none';
-            recyclingTipsScreen.style.display = 'none';
-        });
-
-        tipsBtn.addEventListener('click', () => {
-            classificationResultsScreen.style.display = 'none';
-            recyclingTipsScreen.style.display = 'block';
         });
     </script>
 </body>
