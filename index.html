@@ -139,21 +139,25 @@
         const recyclingTipsScreen = document.getElementById('recycling-tips-screen');
         const learnRecycleBtn = document.getElementById('learn-recycle-btn');
 
+        // Function to classify the image using Edge Impulse
         async function classifyImage(imageData) {
+            // Initialize the classifier
             const classifier = new EdgeImpulseClassifier();
             await classifier.init();
 
-            // Use base64 string as image data for classification
+            // Use the classify function with the image data
             let res = await classifier.classify(imageData);
             return res;
         }
 
+        // Display the results of the classification
         function showClassificationResults(photoData, classificationResultText, isRecyclable) {
             uploadedPhoto.textContent = "Uploaded Photo";
             uploadedPhoto.style.backgroundImage = `url(${photoData})`;
             classificationResult.textContent = `Classification Result: ${classificationResultText}`;
             classificationResultsScreen.style.display = 'block';
-            
+
+            // Show or hide tips based on classification result
             if (isRecyclable) {
                 learnRecycleBtn.style.display = 'inline-block';
                 recyclingTipsScreen.style.display = 'block';
@@ -163,19 +167,23 @@
             }
         }
 
+        // Event listener for the "Take or Upload Photo" button
         uploadPhotoBtn.addEventListener('click', () => {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'image/*';
             input.click();
 
+            // When the user selects a file
             input.addEventListener('change', (event) => {
                 const file = event.target.files[0];
                 const reader = new FileReader();
 
+                // Once the image is loaded, classify it
                 reader.onloadend = () => {
                     const photoData = reader.result;  // base64 string
 
+                    // Call classifyImage with the base64 string
                     classifyImage(photoData).then(res => {
                         const classificationText = res.result.label;
                         const isRecyclable = classificationText.toLowerCase() === 'recyclable';
@@ -183,7 +191,7 @@
                     });
                 };
                 
-                reader.readAsDataURL(file);  // Convert image to base64 string
+                reader.readAsDataURL(file);  // Convert the image to base64 string
             });
         });
     </script>
