@@ -42,7 +42,7 @@
         }
 
         button:hover {
-            background-color: #0056b3; /* Hover effect remains blue */
+            background-color: green; /* Hover effect remains green */
         }
 
         .nav-bar {
@@ -107,8 +107,8 @@
     </div>
 
     <div class="nav-bar">
-        <a href="#home"><i class="fas fa-home">🏠</i></a>
-        <a href="#tips"><i class="fas fa-book">📘</i></a>
+        <a href="#home" id="home-btn"><i class="fas fa-home">🏠</i></a>
+        <a href="#tips" id="tips-btn"><i class="fas fa-book">📘</i></a>
     </div>
 
     <div id="classification-results-screen" style="display: none;">
@@ -137,6 +137,8 @@
         const classificationResultsScreen = document.getElementById('classification-results-screen');
         const recyclingTipsScreen = document.getElementById('recycling-tips-screen');
         const learnRecycleBtn = document.getElementById('learn-recycle-btn');
+        const homeBtn = document.getElementById('home-btn');
+        const tipsBtn = document.getElementById('tips-btn');
 
         let classifier;
 
@@ -176,6 +178,18 @@
             }
         }
 
+        // Show the home screen
+        function showHomeScreen() {
+            classificationResultsScreen.style.display = 'none';
+            recyclingTipsScreen.style.display = 'none';
+        }
+
+        // Show the recycling tips screen
+        function showRecyclingTipsScreen() {
+            classificationResultsScreen.style.display = 'none';
+            recyclingTipsScreen.style.display = 'block';
+        }
+
         uploadPhotoBtn.addEventListener('click', () => {
             const input = document.createElement('input');
             input.type = 'file';
@@ -200,6 +214,17 @@
                 
                 reader.readAsDataURL(file);  // Convert image to base64 string
             });
+        });
+
+        // Navigation button listeners
+        homeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            showHomeScreen();
+        });
+
+        tipsBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            showRecyclingTipsScreen();
         });
     </script>
 </body>
