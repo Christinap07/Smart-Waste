@@ -95,18 +95,6 @@
         .learn-more-btn {
             margin-top: 20px;
         }
-
-        #video {
-            display: block;
-            margin: 0 auto;
-            width: 80%;
-            height: 300px;
-            background-color: #333;
-        }
-
-        #canvas {
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -142,9 +130,6 @@
         <button class="learn-more-btn">Learn More</button>
     </div>
 
-    <video id="video" autoplay></video>
-    <canvas id="canvas"></canvas>
-
     <script src="edge-impulse-standalone.js"></script>
     <script>
         const uploadPhotoBtn = document.getElementById('upload-photo-btn');
@@ -153,31 +138,12 @@
         const classificationResultsScreen = document.getElementById('classification-results-screen');
         const recyclingTipsScreen = document.getElementById('recycling-tips-screen');
         const learnRecycleBtn = document.getElementById('learn-recycle-btn');
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-
-        async function startCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                video.srcObject = stream;
-            } catch (err) {
-                alert('Error accessing camera: ' + err);
-            }
-        }
-
-        async function capturePhoto() {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imageData = canvas.toDataURL('image/png');  // base64 string
-            return imageData;
-        }
 
         async function classifyImage(imageData) {
             const classifier = new EdgeImpulseClassifier();
             await classifier.init();
 
+            // Use base64 string as image data for classification
             let res = await classifier.classify(imageData);
             return res;
         }
@@ -198,43 +164,28 @@
         }
 
         uploadPhotoBtn.addEventListener('click', () => {
-            if (video.srcObject) {
-                // Capture the photo from the camera
-                capturePhoto().then(photoData => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.click();
+
+            input.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+
+                reader.onloadend = () => {
+                    const photoData = reader.result;  // base64 string
+
                     classifyImage(photoData).then(res => {
                         const classificationText = res.result.label;
                         const isRecyclable = classificationText.toLowerCase() === 'recyclable';
                         showClassificationResults(photoData, classificationText, isRecyclable);
                     });
-                });
-            } else {
-                // Handle file upload if camera is not available
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = 'image/*';
-                input.click();
-
-                input.addEventListener('change', (event) => {
-                    const file = event.target.files[0];
-                    const reader = new FileReader();
-
-                    reader.onloadend = () => {
-                        const photoData = reader.result;  // base64 string
-
-                        classifyImage(photoData).then(res => {
-                            const classificationText = res.result.label;
-                            const isRecyclable = classificationText.toLowerCase() === 'recyclable';
-                            showClassificationResults(photoData, classificationText, isRecyclable);
-                        });
-                    };
-                    
-                    reader.readAsDataURL(file);  // Convert image to base64 string
-                });
-            }
+                };
+                
+                reader.readAsDataURL(file);  // Convert image to base64 string
+            });
         });
-
-        // Start the camera when the page loads
-        startCamera();
     </script>
 </body>
 </html>
