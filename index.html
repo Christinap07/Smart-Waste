@@ -138,13 +138,18 @@
         const classificationResultsScreen = document.getElementById('classification-results-screen');
         const recyclingTipsScreen = document.getElementById('recycling-tips-screen');
         const learnRecycleBtn = document.getElementById('learn-recycle-btn');
+        
+        let classifier;
 
-        async function classifyImage(imageData) {
-            const classifier = new EdgeImpulseClassifier();
+        // Initialize the classifier once when the page loads
+        async function initClassifier() {
+            classifier = new EdgeImpulseClassifier();
             await classifier.init();
-
-            // Use base64 string as image data for classification
-            let res = await classifier.classify(imageData);
+        }
+        
+        async function classifyImage(imageData) {
+            // Classify the image using the classifier
+            const res = await classifier.classify(imageData);
             return res;
         }
 
@@ -163,6 +168,9 @@
             }
         }
 
+        // Initialize the classifier when the page loads
+        initClassifier();
+        
         uploadPhotoBtn.addEventListener('click', () => {
             const input = document.createElement('input');
             input.type = 'file';
@@ -180,6 +188,8 @@
                         const classificationText = res.result.label;
                         const isRecyclable = classificationText.toLowerCase() === 'recyclable';
                         showClassificationResults(photoData, classificationText, isRecyclable);
+                    }).catch(error => {
+                        console.error('Error during classification:', error);
                     });
                 };
                 
