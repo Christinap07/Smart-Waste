@@ -16,7 +16,7 @@
             justify-content: space-between;
             text-align: center;
         }
-        
+
         header {
             background-color: #2c3e50;
             color: white;
@@ -24,7 +24,7 @@
             font-size: 24px;
             text-align: center;
         }
-        
+
         .button-container {
             margin: 30px 0;
         }
@@ -172,7 +172,6 @@
 
         // Handle the "Take a Photo" button
         takePhotoBtn.addEventListener('click', () => {
-            // Access the device camera and capture photo
             navigator.mediaDevices.getUserMedia({ video: true })
                 .then((stream) => {
                     const video = document.createElement('video');
@@ -180,13 +179,25 @@
                     video.play();
                     document.body.appendChild(video);
 
-                    // Take a snapshot from the video stream
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    setTimeout(() => {
+                    // Create a button to take the snapshot
+                    const snapshotButton = document.createElement('button');
+                    snapshotButton.textContent = 'Take Snapshot';
+                    snapshotButton.style.position = 'absolute';
+                    snapshotButton.style.bottom = '10px';
+                    snapshotButton.style.left = '50%';
+                    snapshotButton.style.transform = 'translateX(-50%)';
+                    document.body.appendChild(snapshotButton);
+
+                    snapshotButton.addEventListener('click', () => {
+                        // Take a snapshot from the video stream
+                        const canvas = document.createElement('canvas');
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        const context = canvas.getContext('2d');
                         context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
                         const photoData = canvas.toDataURL('image/png');
-                        
+
                         // Process the image through Edge Impulse model
                         classifyImage(photoData).then(res => {
                             const classificationText = res.result.label;
@@ -194,9 +205,11 @@
                             showClassificationResults(photoData, classificationText, isRecyclable);
                         });
 
-                        video.srcObject.getTracks().forEach(track => track.stop()); // Stop camera stream
+                        // Clean up video and button
+                        video.srcObject.getTracks().forEach(track => track.stop());
                         document.body.removeChild(video);
-                    }, 1000);  // Wait a moment for the camera stream to be stable
+                        document.body.removeChild(snapshotButton);
+                    });
                 })
                 .catch((err) => {
                     console.error('Error accessing camera: ', err);
