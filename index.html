@@ -107,8 +107,8 @@
     </div>
 
     <div class="nav-bar">
-        <a href="#home" id="home-btn"><i class="fas fa-home">🏠</i></a>
-        <a href="#tips" id="tips-btn"><i class="fas fa-book">📘</i></a>
+        <a href="#home"><i class="fas fa-home">🏠</i></a>
+        <a href="#tips"><i class="fas fa-book">📘</i></a>
     </div>
 
     <div id="classification-results-screen" style="display: none;">
@@ -126,7 +126,7 @@
             <li>Rinse items before recycling.</li>
             <li>Avoid recycling items with food residue.</li>
         </ul>
-        <button class="learn-more-btn">Learn More</button>
+        <button class="learn-more-btn" id="learn-more-btn">Learn More</button>
     </div>
 
     <script src="path-to-your-edge-impulse-standalone.js"></script>
@@ -137,8 +137,7 @@
         const classificationResultsScreen = document.getElementById('classification-results-screen');
         const recyclingTipsScreen = document.getElementById('recycling-tips-screen');
         const learnRecycleBtn = document.getElementById('learn-recycle-btn');
-        const homeBtn = document.getElementById('home-btn');
-        const tipsBtn = document.getElementById('tips-btn');
+        const learnMoreBtn = document.getElementById('learn-more-btn');
 
         let classifier;
 
@@ -178,18 +177,6 @@
             }
         }
 
-        // Show the home screen
-        function showHomeScreen() {
-            classificationResultsScreen.style.display = 'none';
-            recyclingTipsScreen.style.display = 'none';
-        }
-
-        // Show the recycling tips screen
-        function showRecyclingTipsScreen() {
-            classificationResultsScreen.style.display = 'none';
-            recyclingTipsScreen.style.display = 'block';
-        }
-
         uploadPhotoBtn.addEventListener('click', () => {
             const input = document.createElement('input');
             input.type = 'file';
@@ -216,15 +203,9 @@
             });
         });
 
-        // Navigation button listeners
-        homeBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            showHomeScreen();
-        });
-
-        tipsBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            showRecyclingTipsScreen();
+        // Redirect to Learn More page when button is clicked
+        learnMoreBtn.addEventListener('click', () => {
+            window.location.href = 'https://www.dcceew.gov.au/environment/protection/waste/consumers';
         });
     </script>
 </body>
