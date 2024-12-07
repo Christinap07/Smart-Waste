@@ -1,191 +1,92 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartSort</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f7f7f7;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            justify-content: space-between;
-            text-align: center;
-        }
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f7f7f7;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        justify-content: space-between;
+        text-align: center;
+    }
 
-        header {
-            background-color: #2c3e50;
-            color: white;
-            padding: 10px;
-            font-size: 24px;
-            text-align: center;
-        }
+    header {
+        background-color: #2c3e50;
+        color: white;
+        padding: 10px;
+        font-size: 24px;
+        text-align: center;
+    }
 
-        .button-container {
-            margin: 30px 0;
-        }
+    .button-container {
+        margin: 30px 0;
+    }
 
-        button {
-            font-size: 20px;
-            padding: 15px 30px;
-            background-color: #28a745; /* Green color */
-            color: white;
-            border: none;
-            border-radius: 5px;
-            width: 80%;
-            margin: 10px;
-            cursor: pointer;
-        }
+    button {
+        font-size: 20px;
+        padding: 15px 30px;
+        background-color: #28a745; /* Green color */
+        color: white;
+        border: none;
+        border-radius: 5px;
+        width: 80%;
+        margin: 10px;
+        cursor: pointer;
+    }
 
-        button:hover {
-            background-color: #0056b3;
-        }
+    button:hover {
+        background-color: #218838; /* Darker green on hover */
+    }
 
-        .nav-bar {
-            background-color: #34495e;
-            color: white;
-            padding: 15px;
-            display: flex;
-            justify-content: space-around;
-        }
+    .nav-bar {
+        background-color: #34495e;
+        color: white;
+        padding: 15px;
+        display: flex;
+        justify-content: space-around;
+    }
 
-        .nav-bar i {
-            font-size: 24px;
-        }
+    .nav-bar i {
+        font-size: 24px;
+    }
 
-        #results {
-            font-family: monospace;
-            white-space: pre-wrap;
-            padding: 10px;
-            background-color: #eaeaea;
-            border-radius: 5px;
-        }
+    #results {
+        font-family: monospace;
+        white-space: pre-wrap;
+        padding: 10px;
+        background-color: #eaeaea;
+        border-radius: 5px;
+    }
 
-        .photo-placeholder {
-            width: 80%;
-            height: 250px;
-            background-color: #ddd;
-            margin: 20px auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #555;
-            font-size: 18px;
-        }
+    .photo-placeholder {
+        width: 80%;
+        height: 250px;
+        background-color: #ddd;
+        margin: 20px auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #555;
+        font-size: 18px;
+    }
 
-        #tips-list {
-            list-style-type: none;
-            padding: 0;
-        }
+    #tips-list {
+        list-style-type: none;
+        padding: 0;
+    }
 
-        #tips-list li {
-            font-size: 18px;
-            margin: 10px 0;
-        }
+    #tips-list li {
+        font-size: 18px;
+        margin: 10px 0;
+    }
 
-        #classification-result {
-            font-size: 24px;
-            margin-top: 20px;
-        }
+    #classification-result {
+        font-size: 24px;
+        margin-top: 20px;
+    }
 
-        .learn-more-btn {
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        Smart Waste
-    </header>
-    
-    <div class="button-container">
-        <button id="upload-photo-btn">Take or Upload Photo</button>
-    </div>
-
-    <div class="nav-bar">
-        <a href="#home"><i class="fas fa-home">🏠</i></a>
-        <a href="#tips"><i class="fas fa-book">📘</i></a>
-    </div>
-
-    <div id="classification-results-screen" style="display: none;">
-        <header>Classification Results</header>
-        <div class="photo-placeholder" id="uploaded-photo">
-            Upload or take a photo to classify it.
-        </div>
-        <div id="classification-result"></div>
-        <button class="learn-more-btn" id="learn-recycle-btn" style="display:none;">Learn How to Recycle This Item</button>
-    </div>
-
-    <div id="recycling-tips-screen" style="display: none;">
-        <header>Recycling Tips</header>
-        <ul id="tips-list">
-            <li>Rinse items before recycling.</li>
-            <li>Separate paper from plastic.</li>
-            <li>Avoid recycling items with food residue.</li>
-        </ul>
-        <button class="learn-more-btn">Learn More</button>
-    </div>
-
-    <script src="edge-impulse-standalone.js"></script>
-    <script>
-        const uploadPhotoBtn = document.getElementById('upload-photo-btn');
-        const uploadedPhoto = document.getElementById('uploaded-photo');
-        const classificationResult = document.getElementById('classification-result');
-        const classificationResultsScreen = document.getElementById('classification-results-screen');
-        const recyclingTipsScreen = document.getElementById('recycling-tips-screen');
-        const learnRecycleBtn = document.getElementById('learn-recycle-btn');
-
-        async function classifyImage(imageData) {
-            const classifier = new EdgeImpulseClassifier();
-            await classifier.init();
-
-            // Use base64 string as image data for classification
-            let res = await classifier.classify(imageData);
-            return res;
-        }
-
-        function showClassificationResults(photoData, classificationResultText, isRecyclable) {
-            uploadedPhoto.textContent = "Uploaded Photo";
-            uploadedPhoto.style.backgroundImage = `url(${photoData})`;
-            classificationResult.textContent = `Classification Result: ${classificationResultText}`;
-            classificationResultsScreen.style.display = 'block';
-            
-            if (isRecyclable) {
-                learnRecycleBtn.style.display = 'inline-block';
-                recyclingTipsScreen.style.display = 'block';
-            } else {
-                learnRecycleBtn.style.display = 'none';
-                recyclingTipsScreen.style.display = 'none';
-            }
-        }
-
-        uploadPhotoBtn.addEventListener('click', () => {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.click();
-
-            input.addEventListener('change', (event) => {
-                const file = event.target.files[0];
-                const reader = new FileReader();
-
-                reader.onloadend = () => {
-                    const photoData = reader.result;  // base64 string
-
-                    classifyImage(photoData).then(res => {
-                        const classificationText = res.result.label;
-                        const isRecyclable = classificationText.toLowerCase() === 'recyclable';
-                        showClassificationResults(photoData, classificationText, isRecyclable);
-                    });
-                };
-                
-                reader.readAsDataURL(file);  // Convert image to base64 string
-            });
-        });
-    </script>
-</body>
-</html>
+    .learn-more-btn {
+        margin-top: 20px;
+    }
+</style>
