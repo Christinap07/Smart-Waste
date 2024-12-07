@@ -141,13 +141,13 @@
 
         let classifier;
 
-        // Initialize the classifier once
+        // Initialise the classifier once
         async function initClassifier() {
             classifier = new EdgeImpulseClassifier();
             await classifier.init();
         }
 
-        // Initialize classifier on page load
+        // Initialise classifier on page load
         initClassifier();
 
         // Classify the image
