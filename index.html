@@ -143,6 +143,7 @@
             const classifier = new EdgeImpulseClassifier();
             await classifier.init();
 
+            // Use base64 string as image data for classification
             let res = await classifier.classify(imageData);
             return res;
         }
@@ -169,13 +170,20 @@
             input.click();
 
             input.addEventListener('change', (event) => {
-                const photoData = URL.createObjectURL(event.target.files[0]);
+                const file = event.target.files[0];
+                const reader = new FileReader();
+
+                reader.onloadend = () => {
+                    const photoData = reader.result;  // base64 string
+
+                    classifyImage(photoData).then(res => {
+                        const classificationText = res.result.label;
+                        const isRecyclable = classificationText.toLowerCase() === 'recyclable';
+                        showClassificationResults(photoData, classificationText, isRecyclable);
+                    });
+                };
                 
-                classifyImage(photoData).then(res => {
-                    const classificationText = res.result.label;
-                    const isRecyclable = classificationText.toLowerCase() === 'recyclable';
-                    showClassificationResults(photoData, classificationText, isRecyclable);
-                });
+                reader.readAsDataURL(file);  // Convert image to base64 string
             });
         });
     </script>
